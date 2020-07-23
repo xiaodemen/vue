@@ -337,7 +337,7 @@ describe('Directive v-model text', () => {
       expect(spy.calls.count()).toBe(1)
     })
 
-    it('triggers extra input on compositionstart + end', () => {
+    it('triggers extra input on compositionupdate + input + end', () => {
       const spy = jasmine.createSpy()
       const vm = new Vue({
         data: {
@@ -355,6 +355,8 @@ describe('Directive v-model text', () => {
       triggerEvent(vm.$el, 'input')
       expect(spy.calls.count()).toBe(1)
       triggerEvent(vm.$el, 'compositionstart')
+      triggerEvent(vm.$el, 'compositionupdate')
+      triggerEvent(vm.$el, 'input')
       triggerEvent(vm.$el, 'compositionend')
       expect(spy.calls.count()).toBe(2)
     })

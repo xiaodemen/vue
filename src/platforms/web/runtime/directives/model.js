@@ -19,6 +19,9 @@ if (isIE9) {
   })
 }
 
+const COMPOSITION_UPDATE = 'COMPOSITION_UPDATE'
+const COMPOSITION_INPUT = 'COMPOSITION_INPUT'
+
 const directive = {
   inserted (el, binding, vnode, oldVnode) {
     if (vnode.tag === 'select') {
@@ -35,7 +38,9 @@ const directive = {
       el._vModifiers = binding.modifiers
       if (!binding.modifiers.lazy) {
         el.addEventListener('compositionstart', onCompositionStart)
+        el.addEventListener('compositionupdate', onCompositionUpdate)
         el.addEventListener('compositionend', onCompositionEnd)
+        el.addEventListener('input', onCompositionInput)
         // Safari < 10.2 & UIWebView doesn't fire compositionend when
         // switching focus before confirming composition choice
         // this also fixes the issue where some browsers e.g. iOS Chrome
@@ -131,11 +136,24 @@ function onCompositionStart (e) {
   e.target.composing = true
 }
 
+function onCompositionUpdate (e) {
+  e.target.compositionStatus = COMPOSITION_UPDATE
+}
+
+function onCompositionInput (e) {
+  if (e.target.compositionStatus === COMPOSITION_UPDATE) {
+    e.target.compositionStatus === COMPOSITION_INPUT
+  }
+}
+
 function onCompositionEnd (e) {
   // prevent triggering an input event for no reason
   if (!e.target.composing) return
   e.target.composing = false
-  trigger(e.target, 'input')
+  if (e.target.compositionStatus === COMPOSITION_INPUT) {
+    trigger(e.target, 'input')
+  }
+  e.target.compositionStatus = undefined
 }
 
 function trigger (el, type) {
